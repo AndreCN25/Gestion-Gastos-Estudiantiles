@@ -69,11 +69,11 @@ def test_external_integrations_are_called_through_authenticated_routes(client,au
     monkeypatch.setattr("app.main.fetch_exchange",fake_exchange)
     weather=client.get("/api/external/weather?city=Mérida",headers=auth_headers)
     location=client.get("/api/external/weather?latitude=19.4326&longitude=-99.1332",headers=auth_headers)
-    exchange=client.get("/api/external/exchange?source=USD&target=MXN",headers=auth_headers)
+    exchange=client.get("/api/external/exchange?source=MXN&target=USD",headers=auth_headers)
     assert weather.status_code==200 and weather.json()["temperature_c"]==28
     assert location.status_code==200 and location.json()["city"]=="Tu ubicación actual"
     assert weather_calls==[("Mérida",None,None),(None,19.4326,-99.1332)]
-    assert exchange_calls==[("USD","MXN")]
+    assert exchange_calls==[("MXN","USD")]
     assert exchange.status_code==200 and exchange.json()["rate"]==0.05
 
 def test_ai_endpoint_has_local_fallback(client,auth_headers,monkeypatch):

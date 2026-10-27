@@ -116,7 +116,7 @@ async def weather(city: str | None = Query(default=None, min_length=2, max_lengt
 
 
 @app.get("/api/external/exchange")
-async def exchange(source: str = Query(default="USD", pattern=r"^[A-Za-z]{3}$"), target: str = Query(default="MXN", pattern=r"^[A-Za-z]{3}$"), user: User = Depends(get_current_user)):
+async def exchange(source: str = Query(default="MXN", pattern=r"^[A-Za-z]{3}$"), target: str = Query(default="USD", pattern=r"^[A-Za-z]{3}$"), user: User = Depends(get_current_user)):
     try:
         return await fetch_exchange(source.upper(), target.upper())
     except Exception:

@@ -45,7 +45,7 @@ Edita `.env` y reemplaza `SECRET_KEY` por una cadena aleatoria de 32+ caracteres
 | DELETE | `/api/expenses/{id}` | Propietario/admin | Eliminar gasto |
 | GET | `/api/summary` | Sesión | Resumen mensual propio |
 | GET | `/api/external/weather?city=...` | Sesión | Clima actual aproximado por ciudad |
-| GET | `/api/external/exchange?source=USD&target=MXN` | Sesión | Tipo de cambio de referencia USD/MXN |
+| GET | `/api/external/exchange?source=MXN&target=USD` | Sesión | Equivalencia de referencia MXN/USD |
 | POST | `/api/ai/tips` | Sesión | Recomendaciones basadas en gastos del usuario |
 | GET | `/api/admin/summary` | Administrador | Conteos agregados |
 | GET | `/health` | Público | Estado de servicio |
