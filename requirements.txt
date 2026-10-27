@@ -7,6 +7,6 @@ passlib[bcrypt]==1.7.4
 bcrypt==4.0.1
 httpx==0.28.1
 openai==1.82.0
-psycopg[binary]==3.2.9
+psycopg[binary]==3.2.10
 email-validator==2.2.0
 pytest==8.3.5
