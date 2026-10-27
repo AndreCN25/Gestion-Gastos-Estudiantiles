@@ -1,6 +1,6 @@
 # Bitácora 1 — Arquitectura y backend
 
-**Integrante:** ____________________  
+**Integrante:** Andre Castillo Novelo  
 **Fecha de revisión personal:** ____________________  
 **Estado:** borrador asistido por IA a partir del código y pruebas del repositorio. No se atribuyen reflexiones ni sesiones a una persona sin que esta las complete.
 

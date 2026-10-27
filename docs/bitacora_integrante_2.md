@@ -1,6 +1,6 @@
 # Bitácora 2 — Interfaz, calidad e integración
 
-**Integrante:** ____________________  
+**Integrante:** Mariana Isabel Cohuo Pech  
 **Fecha de revisión personal:** ____________________  
 **Estado:** borrador asistido por IA a partir del código, configuración y pruebas del repositorio. La reflexión personal y las transcripciones reales requieren revisión del integrante.
 
