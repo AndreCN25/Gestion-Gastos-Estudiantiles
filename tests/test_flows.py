@@ -83,6 +83,14 @@ def test_ai_endpoint_has_local_fallback(client,auth_headers,monkeypatch):
     assert result.status_code==200
     assert "Comida" in result.json()["tips"]
     assert "mode" in result.json()
+    next_result=client.post("/api/ai/tips",headers=auth_headers,json={"previous_tips":[result.json()["tips"]]})
+    assert next_result.status_code==200 and next_result.json()["tips"]!=result.json()["tips"]
+
+def test_generic_saving_tips_change_on_each_request(client,auth_headers,monkeypatch):
+    monkeypatch.setattr("app.services.settings.openai_api_key","")
+    first=client.post("/api/ai/tips",headers=auth_headers,json={}).json()["tips"]
+    second=client.post("/api/ai/tips",headers=auth_headers,json={"previous_tips":[first]}).json()["tips"]
+    assert second!=first
 
 def test_web_shell_is_served(client):
     assert client.get("/").status_code==200
