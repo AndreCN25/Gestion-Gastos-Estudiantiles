@@ -1,6 +1,7 @@
 from collections import defaultdict
 from datetime import date
 from decimal import Decimal
+import logging
 from pathlib import Path
 from fastapi import Depends, FastAPI, HTTPException, Query, status
 from fastapi.responses import FileResponse
@@ -13,6 +14,8 @@ from .models import Expense, User
 from .schemas import ExpenseIn, ExpenseOut, LoginIn, RegisterIn
 from .security import create_token, get_current_user, hash_password, require_admin, verify_password
 from .services import fetch_exchange, fetch_weather, spending_tips
+
+logger = logging.getLogger(__name__)
 
 if len(settings.secret_key) < 32 or settings.secret_key == "replace-with-a-long-random-secret":
     raise RuntimeError("Configura SECRET_KEY con al menos 32 caracteres aleatorios antes de iniciar la aplicación.")
@@ -108,11 +111,12 @@ async def weather(city: str | None = Query(default=None, min_length=2, max_lengt
     try:
         return await fetch_weather(city, latitude, longitude)
     except Exception:
+        logger.exception("Falló la consulta del clima")
         raise HTTPException(502, "El servicio de clima no está disponible ahora")
 
 
 @app.get("/api/external/exchange")
-async def exchange(source: str = Query(default="MXN", pattern=r"^[A-Za-z]{3}$"), target: str = Query(default="USD", pattern=r"^[A-Za-z]{3}$"), user: User = Depends(get_current_user)):
+async def exchange(source: str = Query(default="USD", pattern=r"^[A-Za-z]{3}$"), target: str = Query(default="MXN", pattern=r"^[A-Za-z]{3}$"), user: User = Depends(get_current_user)):
     try:
         return await fetch_exchange(source.upper(), target.upper())
     except Exception:
