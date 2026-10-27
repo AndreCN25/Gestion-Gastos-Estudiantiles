@@ -1,4 +1,4 @@
-const CACHE='cuentaclara-shell-v3';
+const CACHE='cuentaclara-shell-v4';
 const SHELL=['/','/static/styles.css','/static/app.js','/static/manifest.webmanifest','/static/favicon.svg'];
 const SHELL_PATHS=new Set(SHELL);
 
