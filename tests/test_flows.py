@@ -57,15 +57,23 @@ def test_admin_role_and_student_restriction(client,auth_headers):
     assert client.get("/api/admin/summary",headers=auth_headers).status_code==403
 
 def test_external_integrations_are_called_through_authenticated_routes(client,auth_headers,monkeypatch):
-    async def fake_weather(city):
-        return {"city":city,"temperature_c":28,"weather_code":1}
+    weather_calls=[]
+    async def fake_weather(city=None,latitude=None,longitude=None):
+        weather_calls.append((city,latitude,longitude))
+        return {"city":city or "Tu ubicación actual","temperature_c":28,"weather_code":1,"condition":"Mayormente despejado"}
+    exchange_calls=[]
     async def fake_exchange(source,target):
+        exchange_calls.append((source,target))
         return {"date":"2026-10-26","from":source,"to":target,"rate":0.05}
     monkeypatch.setattr("app.main.fetch_weather",fake_weather)
     monkeypatch.setattr("app.main.fetch_exchange",fake_exchange)
     weather=client.get("/api/external/weather?city=Mérida",headers=auth_headers)
-    exchange=client.get("/api/external/exchange?from=MXN&to=USD",headers=auth_headers)
+    location=client.get("/api/external/weather?latitude=19.4326&longitude=-99.1332",headers=auth_headers)
+    exchange=client.get("/api/external/exchange?source=MXN&target=USD",headers=auth_headers)
     assert weather.status_code==200 and weather.json()["temperature_c"]==28
+    assert location.status_code==200 and location.json()["city"]=="Tu ubicación actual"
+    assert weather_calls==[("Mérida",None,None),(None,19.4326,-99.1332)]
+    assert exchange_calls==[("MXN","USD")]
     assert exchange.status_code==200 and exchange.json()["rate"]==0.05
 
 def test_ai_endpoint_has_local_fallback(client,auth_headers,monkeypatch):

@@ -6,7 +6,7 @@ from .config import settings
 
 async def fetch_weather(city: str | None = None, latitude: float | None = None, longitude: float | None = None):
     """Fetch a forecast by city name or exact browser-provided coordinates."""
-    async with httpx.AsyncClient(timeout=8) as client:
+    async with httpx.AsyncClient(timeout=15) as client:
         place_name = city or "Tu ubicación actual"
         if latitude is None or longitude is None:
             geo = await client.get("https://geocoding-api.open-meteo.com/v1/search", params={"name": city, "count": 1, "language": "es", "format": "json"})
@@ -20,6 +20,8 @@ async def fetch_weather(city: str | None = None, latitude: float | None = None, 
         forecast = await client.get("https://api.open-meteo.com/v1/forecast", params={"latitude": latitude, "longitude": longitude, "current": "temperature_2m,weather_code"})
         forecast.raise_for_status()
         current = forecast.json().get("current", {})
+        if current.get("temperature_2m") is None:
+            return {"city": place_name, "temperature_c": None, "message": "El proveedor no devolvió la temperatura actual."}
         return {"city": place_name, "temperature_c": current.get("temperature_2m"), "weather_code": current.get("weather_code"), "condition": weather_condition(current.get("weather_code"))}
 
 
