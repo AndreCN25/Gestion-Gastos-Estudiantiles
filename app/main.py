@@ -102,9 +102,11 @@ def summary(month: str = Query(default_factory=lambda: date.today().strftime("%Y
 
 
 @app.get("/api/external/weather")
-async def weather(city: str = Query(min_length=2, max_length=80), user: User = Depends(get_current_user)):
+async def weather(city: str | None = Query(default=None, min_length=2, max_length=80), latitude: float | None = Query(default=None, ge=-90, le=90), longitude: float | None = Query(default=None, ge=-180, le=180), user: User = Depends(get_current_user)):
+    if (latitude is None) != (longitude is None) or (city is None and latitude is None):
+        raise HTTPException(422, "Indica una ciudad o una ubicación completa")
     try:
-        return await fetch_weather(city)
+        return await fetch_weather(city, latitude, longitude)
     except Exception:
         raise HTTPException(502, "El servicio de clima no está disponible ahora")
 

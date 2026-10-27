@@ -4,19 +4,32 @@ import httpx
 from .config import settings
 
 
-async def fetch_weather(city: str):
+async def fetch_weather(city: str | None = None, latitude: float | None = None, longitude: float | None = None):
     """Open-Meteo geocoding + forecast; both APIs are free and keyless."""
     async with httpx.AsyncClient(timeout=8) as client:
-        geo = await client.get("https://geocoding-api.open-meteo.com/v1/search", params={"name": city, "count": 1, "language": "es", "format": "json"})
-        geo.raise_for_status()
-        results = geo.json().get("results", [])
-        if not results:
-            return {"city": city, "message": "No encontramos esa ciudad."}
-        place = results[0]
-        forecast = await client.get("https://api.open-meteo.com/v1/forecast", params={"latitude": place["latitude"], "longitude": place["longitude"], "current": "temperature_2m,weather_code"})
+        place_name = city
+        if latitude is None or longitude is None:
+            geo = await client.get("https://geocoding-api.open-meteo.com/v1/search", params={"name": city, "count": 1, "language": "es", "format": "json"})
+            geo.raise_for_status()
+            results = geo.json().get("results", [])
+            if not results:
+                return {"city": city, "message": "No encontramos esa ciudad."}
+            place = results[0]
+            latitude, longitude = place["latitude"], place["longitude"]
+            place_name = place["name"]
+        else:
+            # Resolve the coordinates to a city so the user sees which place was detected.
+            try:
+                reverse = await client.get("https://nominatim.openstreetmap.org/reverse", params={"lat": latitude, "lon": longitude, "format": "jsonv2", "zoom": 10, "accept-language": "es"}, headers={"User-Agent": "CuentaClara/1.0"})
+                reverse.raise_for_status()
+                address = reverse.json().get("address", {})
+                place_name = address.get("city") or address.get("town") or address.get("village") or address.get("municipality") or address.get("county") or "Tu ubicación actual"
+            except httpx.HTTPError:
+                place_name = "Tu ubicación actual"
+        forecast = await client.get("https://api.open-meteo.com/v1/forecast", params={"latitude": latitude, "longitude": longitude, "current": "temperature_2m,weather_code"})
         forecast.raise_for_status()
         current = forecast.json().get("current", {})
-        return {"city": place["name"], "temperature_c": current.get("temperature_2m"), "weather_code": current.get("weather_code")}
+        return {"city": place_name, "temperature_c": current.get("temperature_2m"), "weather_code": current.get("weather_code")}
 
 
 async def fetch_exchange(source: str, target: str):
