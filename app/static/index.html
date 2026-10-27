@@ -1,0 +1,27 @@
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#105e52"><meta name="description" content="Lleva tus gastos estudiantiles con claridad.">
+  <link rel="manifest" href="/static/manifest.webmanifest"><link rel="stylesheet" href="/static/styles.css">
+  <title>CuentaClara | gastos estudiantiles</title>
+</head>
+<body>
+  <header class="topbar"><a class="brand" href="/" aria-label="CuentaClara, inicio"><span class="brand-mark">CC</span> CuentaClara</a><button id="logout" class="quiet hidden">Cerrar sesión</button></header>
+  <main>
+    <section id="auth" class="auth-layout">
+      <div class="intro"><span class="eyebrow">TU DINERO, MÁS CLARO</span><h1>Pequeños gastos.<br><em>Mejores decisiones.</em></h1><p>Registra lo que gastas, entiende tus hábitos y cuida tu presupuesto durante el semestre.</p><div class="trust"><span>●</span> Tus gastos son privados y solo tú puedes verlos.</div></div>
+      <div class="card auth-card"><div class="tabs"><button id="tab-login" class="tab active">Iniciar sesión</button><button id="tab-register" class="tab">Crear cuenta</button></div><h2 id="auth-title">Qué bueno verte</h2><p id="auth-copy" class="muted">Entra para revisar cómo va tu mes.</p><form id="auth-form"><label>Correo electrónico<input id="email" type="email" autocomplete="email" placeholder="tu@correo.com" required maxlength="254"></label><label>Contraseña<input id="password" type="password" autocomplete="current-password" placeholder="10 caracteres como mínimo" required minlength="10" maxlength="128"></label><p id="auth-error" class="error" role="alert"></p><button class="primary full" id="auth-submit">Entrar a mi cuenta <span>→</span></button></form></div>
+    </section>
+    <section id="dashboard" class="hidden"><div class="welcome"><div><span class="eyebrow">RESUMEN PERSONAL</span><h1>Hola, <span id="user-name">estudiante</span></h1><p class="muted">Una mirada sencilla a tus gastos de este mes.</p></div><div class="month-pill" id="month-label"></div></div>
+      <div class="summary-grid"><article class="card stat-card"><div class="stat-label">Gasto registrado <span class="stat-icon">↗</span></div><strong id="total">$0.00</strong><small id="count">0 movimientos</small></article><article class="card stat-card accent-card"><div class="stat-label">Categoría principal <span class="stat-icon">✳</span></div><strong id="top-category">Sin datos</strong><small id="top-amount">Registra tu primer gasto</small></article></div>
+      <div class="content-grid"><section class="card form-card"><div class="section-head"><div><span class="eyebrow">NUEVO MOVIMIENTO</span><h2>¿Qué gastaste?</h2></div><span class="decor">＋</span></div><form id="expense-form" class="expense-form"><label>Importe<div class="money-field"><span>$</span><input name="amount" type="number" min="0.01" max="1000000" step="0.01" placeholder="0.00" required></div></label><label>Categoría<select name="category" required><option value="">Elige una categoría</option><option>Comida</option><option>Transporte</option><option>Materiales</option><option>Vivienda</option><option>Entretenimiento</option><option>Salud</option><option>Otro</option></select></label><div class="row-fields"><label>Moneda<select name="currency"><option>MXN</option><option>USD</option><option>EUR</option></select></label><label>Fecha<input name="spent_on" type="date" required></label></div><label>Nota <span class="optional">(opcional)</span><input name="note" maxlength="160" placeholder="Ej. comida después de clase"></label><button class="primary full">Guardar gasto <span>→</span></button></form></section>
+      <section class="card history-card"><div class="section-head"><div><span class="eyebrow">ACTIVIDAD RECIENTE</span><h2>Tus movimientos</h2></div><span id="expense-count" class="count-badge">0</span></div><div id="expense-list" class="expense-list"><div class="empty"><span>✳</span><b>Tu lista está lista</b><small>Agrega tu primer gasto para empezar.</small></div></div></section></div>
+      <div class="tools-grid"><article class="card tool-card"><span class="tool-icon">✦</span><div><span class="eyebrow">ASISTENTE DE PRESUPUESTO</span><h2>Un consejo para ti</h2><p id="tip-text" class="muted">Recibe ideas basadas en tus categorías de gasto.</p><button id="tips" class="text-button">Pedir recomendación →</button></div></article><article class="card tool-card"><span class="tool-icon weather-icon">☼</span><div class="tool-wide"><span class="eyebrow">DATOS PARA TU DÍA</span><h2>Clima y tipo de cambio</h2><div class="external-row"><input id="city" aria-label="Ciudad para consultar clima" value="Mérida" maxlength="80"><button id="weather" class="secondary">Ver clima</button><button id="exchange" class="secondary">MXN a USD</button></div><p id="external-result" class="muted" aria-live="polite">Consultas rápidas de servicios externos.</p></div></article></div>
+      <section id="admin-panel" class="card admin-card hidden"><span class="eyebrow">ADMINISTRACIÓN</span><h2>Resumen de la plataforma</h2><p id="admin-info"></p></section>
+    </section>
+    <div id="toast" class="toast" role="status" aria-live="polite"></div>
+  </main>
+  <footer>Hecho para una vida estudiantil con más claridad <span>✳</span><small>Tu información se mantiene privada.</small></footer>
+  <script src="/static/app.js" defer></script>
+</body></html>
