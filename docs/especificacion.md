@@ -18,7 +18,7 @@ CuentaClara ayuda a estudiantes a registrar gastos personales, revisar totales p
 ## Modelo de datos
 
 - `users`: `id` PK, `email` único, `password_hash`, `role`, `created_at`.
-- `expenses`: `id` PK, `user_id` FK a `users.id`, `amount`, `currency`, `category`, `note`, `spent_on`.
+- `expenses`: `id` PK, `user_id` FK a `users.id`, `amount` decimal de dos posiciones, `currency`, `category`, `note`, `spent_on`.
 - Relación uno a muchos: un usuario tiene cero o más gastos. Al eliminar un usuario, se eliminan sus gastos.
 
 ## API REST

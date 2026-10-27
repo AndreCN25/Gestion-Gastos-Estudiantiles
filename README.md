@@ -1,6 +1,8 @@
 # CuentaClara
 
-Aplicación web responsiva para que estudiantes registren y consulten gastos personales. Incluye roles estudiante/administrador, API REST, autenticación JWT, base de datos relacional SQLite (PostgreSQL en producción), consulta de clima y tipo de cambio, asistente IA opcional, pruebas y CI.
+Aplicación web responsiva para registrar gastos personales de estudiantes. Incluye roles estudiante/administrador, API REST, autenticación JWT, base de datos relacional, integraciones de clima y tipo de cambio, función IA opcional, pruebas y CI.
+
+Repositorio: https://github.com/AndreCN25/Gestion-Gastos-Estudiantiles (rama `feature/cuentaclara`).
 
 ## Requisitos
 
@@ -10,16 +12,14 @@ Aplicación web responsiva para que estudiantes registren y consulten gastos per
 
 ## Instalación y ejecución local
 
-```bash
-python -m venv .venv
-# Windows: .venv\Scripts\activate
-# macOS/Linux: source .venv/bin/activate
-pip install -r requirements.txt
-copy .env.example .env  # Windows; en macOS/Linux: cp .env.example .env
-uvicorn app.main:app --reload
+```powershell
+py -3.11 -m venv .venv
+.\.venv\Scripts\Activate.ps1
+python -m pip install -r requirements.txt
+Copy-Item .env.example .env
 ```
 
-Abre http://127.0.0.1:8000. La base SQLite se crea automáticamente. Para crear un administrador, define `ADMIN_EMAIL` y `ADMIN_PASSWORD` antes del primer arranque; sin estas variables se crea únicamente el rol estudiante. Cambia `SECRET_KEY` antes de cualquier despliegue. No subas `.env`.
+Edita `.env` y reemplaza `SECRET_KEY` por una cadena aleatoria de 32+ caracteres (puedes generarla con `python -c "import secrets; print(secrets.token_urlsafe(48))"`). Para crear un admin antes del primer arranque, define `ADMIN_EMAIL` y `ADMIN_PASSWORD` (10 a 72 bytes UTF-8). Después ejecuta `uvicorn app.main:app --reload` y abre http://127.0.0.1:8000. No subas `.env`.
 
 ## Arquitectura
 
@@ -32,7 +32,7 @@ Abre http://127.0.0.1:8000. La base SQLite se crea automáticamente. Para crear 
 
 ### Modelo de datos
 
-`users (1) -> (N) expenses`. Un usuario tiene correo único, hash de contraseña y rol (`student` o `admin`). Cada gasto pertenece a un usuario, e incluye importe positivo, moneda, categoría, nota y fecha. Administradores pueden consultar agregados globales; nunca se exponen hashes.
+`users (1) -> (N) expenses`. Un usuario tiene correo único, hash de contraseña y rol (`student` o `admin`). Cada gasto pertenece a un usuario, e incluye importe decimal de dos posiciones, moneda admitida, categoría, nota y fecha. Administradores consultan agregados globales; no se exponen hashes.
 
 ### Endpoints
 
@@ -52,30 +52,30 @@ Abre http://127.0.0.1:8000. La base SQLite se crea automáticamente. Para crear 
 
 ## Pruebas
 
-```bash
-pytest -q
+```powershell
+python -m pytest -q
 ```
 
 Las pruebas usan una base SQLite temporal y sustituyen llamadas externas para no depender de red ni claves. GitHub Actions ejecuta las pruebas en cada pull request y push a `main`.
 
 ## Variables de entorno
 
-Consulta `.env.example`. `OPENAI_API_KEY` es opcional: si falta, la función IA devuelve sugerencias locales con reglas explícitas. Las APIs de Open-Meteo y Frankfurter no requieren clave. Nunca guardes secretos en el repositorio.
+Consulta `.env.example`. `OPENAI_API_KEY` es opcional: si falta, la app entrega una recomendación local por reglas, que no equivale a probar el modelo de lenguaje. Para demostrar IA generativa, configura la clave como secreto. Open-Meteo y Frankfurter no requieren clave. Nunca guardes secretos en el repositorio.
 
 ## Despliegue
 
-El archivo `render.yaml` prepara un servicio web y PostgreSQL en Render. Conecta un repositorio GitHub a Render, configura `OPENAI_API_KEY` como secreto (opcional) y despliega. Después añade la URL pública aquí: **Pendiente de despliegue por el equipo**. Este entregable no afirma que exista un repositorio GitHub ni una URL pública activa: se requieren las cuentas y autorización del equipo para publicarlos.
+El archivo `render.yaml` prepara web service y PostgreSQL gratuitos para una demostración escolar. Render duerme el servicio web tras 15 minutos sin tráfico y la base gratuita expira a los 30 días; no guardes allí datos permanentes. Al crear el Blueprint, configura `ADMIN_EMAIL` y `ADMIN_PASSWORD` en el panel; `OPENAI_API_KEY` es opcional. La URL pública queda **pendiente** hasta crear el Blueprint y verificar `/health`.
 
 ## Flujo de trabajo del equipo
 
-Trabajen en ramas por función y abran pull requests con revisión cruzada. Prefijos sugeridos para cada commit: `[IA]`, `[HUMANO]` o `[MIXTO]`. El repositorio entregado no incluye commits ni PR reales porque no se proporcionó un remoto GitHub. Estimación del código de esta primera versión: **90% IA, 0% humano directo, 10% mixto/revisión de decisiones**. Ajusten el cálculo según sus cambios reales y documenten cada revisión.
+Trabajen en ramas por función y abran pull requests con revisión cruzada. Prefijos: `[IA]`, `[HUMANO]` o `[MIXTO]`. Los commits de la implementación llevan `[IA]`; recalculen el porcentaje con los cambios humanos reales. Estimación orientativa de esta versión: **90% IA, 0% código humano directo, 10% decisiones/revisión mixta**.
 
 ## Documentación de entrega
 
 - `docs/especificacion.md`: especificación previa al desarrollo.
-- `docs/bitacoras.md`: cuatro bitácoras individuales, con prompts sugeridos y notas transparentes de revisión.
+- `docs/bitacoras.md`: índice de dos bitácoras por área. Los prompts literales y reflexiones personales deben completarlos sus autores reales.
 - `docs/presentacion.md`: guion de demostración de 10 minutos.
 
 ## Seguridad y límites
 
-Passwords se almacenan con bcrypt; tokens JWT expiran; los datos se filtran por usuario; entradas se validan con Pydantic; CORS queda limitado por configuración; secretos se leen del entorno. El tipo de cambio es informativo, el clima es aproximado y la IA no da asesoría financiera profesional. Antes de producción, revisen dependencias, HTTPS, política de privacidad, límites de uso y configuración del proveedor.
+Passwords se almacenan con bcrypt; tokens JWT expiran; se validan entradas y gastos por propietario. El service worker cachea solo el shell estático. La app no limita intentos de login ni permite revocar sesiones. Para producción hacen falta migraciones, HTTPS y política de privacidad. El clima y el tipo de cambio son informativos; la IA no da asesoría financiera profesional.

@@ -1,5 +1,6 @@
 from collections import defaultdict
 from datetime import date
+from decimal import Decimal
 from pathlib import Path
 from fastapi import Depends, FastAPI, HTTPException, Query, status
 from fastapi.responses import FileResponse
@@ -13,9 +14,9 @@ from .schemas import ExpenseIn, ExpenseOut, LoginIn, RegisterIn
 from .security import create_token, get_current_user, hash_password, require_admin, verify_password
 from .services import fetch_exchange, fetch_weather, spending_tips
 
-Base.metadata.create_all(bind=engine)
 if len(settings.secret_key) < 32 or settings.secret_key == "replace-with-a-long-random-secret":
     raise RuntimeError("Configura SECRET_KEY con al menos 32 caracteres aleatorios antes de iniciar la aplicación.")
+Base.metadata.create_all(bind=engine)
 if settings.admin_email and settings.admin_password:
     with SessionLocal() as seed_db:
         if not seed_db.query(User).filter(func.lower(User.email) == settings.admin_email.lower()).first():
@@ -84,13 +85,17 @@ def delete_expense(expense_id: int, db: Session = Depends(get_db), user: User = 
 
 @app.get("/api/summary")
 def summary(month: str = Query(default_factory=lambda: date.today().strftime("%Y-%m"), pattern=r"^\d{4}-\d{2}$"), db: Session = Depends(get_db), user: User = Depends(get_current_user)):
-    start = date.fromisoformat(month + "-01")
-    end = date(start.year + (start.month == 12), start.month % 12 + 1, 1)
+    try:
+        year, month_number = map(int, month.split("-"))
+        start = date(year, month_number, 1)
+        end = date(year + (month_number == 12), month_number % 12 + 1, 1)
+    except ValueError:
+        raise HTTPException(422, "El mes debe ser una fecha válida con formato AAAA-MM")
     rows = db.query(Expense).filter(Expense.user_id == user.id, Expense.spent_on >= start, Expense.spent_on < end).all()
-    totals = defaultdict(float)
+    totals = defaultdict(lambda: Decimal("0.00"))
     for row in rows:
         totals[row.currency] += row.amount
-    by_category = defaultdict(float)
+    by_category = defaultdict(lambda: Decimal("0.00"))
     for row in rows:
         by_category[f"{row.category} ({row.currency})"] += row.amount
     return {"month": month, "count": len(rows), "totals": dict(totals), "by_category": dict(by_category)}

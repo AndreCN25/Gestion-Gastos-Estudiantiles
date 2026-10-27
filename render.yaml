@@ -2,7 +2,8 @@ services:
   - type: web
     name: cuentaclara
     runtime: python
-    buildCommand: pip install -r requirements.txt email-validator
+    plan: free
+    buildCommand: pip install -r requirements.txt
     startCommand: uvicorn app.main:app --host 0.0.0.0 --port $PORT
     healthCheckPath: /health
     envVars:
@@ -16,6 +17,10 @@ services:
         value: https://cuentaclara.onrender.com
       - key: OPENAI_API_KEY
         sync: false
+      - key: ADMIN_EMAIL
+        sync: false
+      - key: ADMIN_PASSWORD
+        sync: false
 databases:
   - name: cuentaclara-db
-    plan: basic-256mb
+    plan: free

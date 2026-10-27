@@ -1,4 +1,5 @@
 from collections import defaultdict
+from decimal import Decimal
 import httpx
 from .config import settings
 
@@ -20,14 +21,17 @@ async def fetch_weather(city: str):
 
 async def fetch_exchange(source: str, target: str):
     async with httpx.AsyncClient(timeout=8) as client:
-        response = await client.get(f"https://api.frankfurter.app/latest", params={"from": source, "to": target})
+        response = await client.get("https://api.frankfurter.dev/v2/rates", params={"base": source, "quotes": target})
         response.raise_for_status()
-        body = response.json()
-        return {"date": body.get("date"), "from": source, "to": target, "rate": body.get("rates", {}).get(target)}
+        rates = response.json()
+        if not rates:
+            return {"date": None, "from": source, "to": target, "rate": None}
+        latest = rates[0]
+        return {"date": latest.get("date"), "from": source, "to": target, "rate": latest.get("rate")}
 
 
 async def spending_tips(expenses):
-    totals = defaultdict(float)
+    totals = defaultdict(lambda: Decimal("0.00"))
     for item in expenses:
         totals[item.category] += item.amount
     if not totals:

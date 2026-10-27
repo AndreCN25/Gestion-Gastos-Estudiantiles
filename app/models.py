@@ -1,5 +1,6 @@
 from datetime import date, datetime, timezone
-from sqlalchemy import Date, DateTime, Float, ForeignKey, Integer, String
+from decimal import Decimal
+from sqlalchemy import Date, DateTime, ForeignKey, Integer, Numeric, String
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 from .database import Base
 
@@ -18,7 +19,7 @@ class Expense(Base):
     __tablename__ = "expenses"
     id: Mapped[int] = mapped_column(Integer, primary_key=True)
     user_id: Mapped[int] = mapped_column(ForeignKey("users.id", ondelete="CASCADE"), index=True)
-    amount: Mapped[float] = mapped_column(Float)
+    amount: Mapped[Decimal] = mapped_column(Numeric(12, 2))
     currency: Mapped[str] = mapped_column(String(3), default="MXN")
     category: Mapped[str] = mapped_column(String(40))
     note: Mapped[str] = mapped_column(String(160), default="")
