@@ -46,3 +46,12 @@ class ExpenseIn(BaseModel):
 class ExpenseOut(ExpenseIn):
     id: int
     model_config = ConfigDict(from_attributes=True)
+
+
+class TipsIn(BaseModel):
+    previous_tips: list[str] = Field(default_factory=list, max_length=8)
+
+    @field_validator("previous_tips")
+    @classmethod
+    def limit_previous_tip_size(cls, tips: list[str]) -> list[str]:
+        return [tip[:500] for tip in tips]

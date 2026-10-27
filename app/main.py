@@ -11,7 +11,7 @@ from sqlalchemy.orm import Session
 from .config import settings
 from .database import Base, SessionLocal, engine, get_db
 from .models import Expense, User
-from .schemas import ExpenseIn, ExpenseOut, LoginIn, RegisterIn
+from .schemas import ExpenseIn, ExpenseOut, LoginIn, RegisterIn, TipsIn
 from .security import create_token, get_current_user, hash_password, require_admin, verify_password
 from .services import fetch_exchange, fetch_weather, spending_tips
 
@@ -124,12 +124,9 @@ async def exchange(source: str = Query(default="MXN", pattern=r"^[A-Za-z]{3}$"),
 
 
 @app.post("/api/ai/tips")
-async def tips(db: Session = Depends(get_db), user: User = Depends(get_current_user)):
+async def tips(db: Session = Depends(get_db), user: User = Depends(get_current_user), data: TipsIn | None = None):
     expenses = db.query(Expense).filter(Expense.user_id == user.id).order_by(Expense.spent_on.desc()).limit(100).all()
-    try:
-        return await spending_tips(expenses)
-    except Exception:
-        raise HTTPException(502, "El asistente IA no está disponible ahora")
+    return await spending_tips(expenses, data.previous_tips if data else [])
 
 
 @app.get("/api/admin/summary")
